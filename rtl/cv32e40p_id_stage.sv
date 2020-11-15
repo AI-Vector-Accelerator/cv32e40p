@@ -29,21 +29,22 @@
 
 module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 #(
-  parameter PULP_XPULP        =  1,                     // PULP ISA Extension (including PULP specific CSRs and hardware loop, excluding p.elw)
+  parameter PULP_XPULP        =  0,                     // PULP ISA Extension (including PULP specific CSRs and hardware loop, excluding p.elw)
   parameter PULP_CLUSTER      =  0,
   parameter N_HWLP            =  2,
   parameter N_HWLP_BITS       =  $clog2(N_HWLP),
   parameter PULP_SECURE       =  0,
   parameter USE_PMP           =  0,
   parameter A_EXTENSION       =  0,
-  parameter APU               =  0,
+  parameter APU               =  1,
   parameter FPU               =  0,
   parameter PULP_ZFINX        =  0,
   parameter APU_NARGS_CPU     =  3,
   parameter APU_WOP_CPU       =  6,
   parameter APU_NDSFLAGS_CPU  = 15,
   parameter APU_NUSFLAGS_CPU  =  5,
-  parameter DEBUG_TRIGGER_EN  =  1
+  parameter DEBUG_TRIGGER_EN  =  1,
+  parameter GDP_NVPE          =  1
 )
 (
     input  logic        clk,                    // Gated clock
@@ -800,7 +801,30 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
       assign apu_waddr = regfile_alu_waddr_id;
 
       // flags
-      assign apu_flags = (FPU == 1) ? {fpu_int_fmt, fpu_src_fmt, fpu_dst_fmt, fp_rnd_mode} : '0;
+      if(FPU == 1) begin
+        assign apu_flags = {fpu_int_fmt, fpu_src_fmt, fpu_dst_fmt, fp_rnd_mode};
+      end else if(GDP_NVPE == 1) begin
+        unique case (apu_op[1:0])
+          2'd0: begin // OP-V  
+            if(apu_op[5:3] == 7) 
+              assign apu_flags = {4'd0, instr_rdata_i[30:20]}; // zimm1
+            else 
+              assign apu_flags = {3'd0, instr_rdata_i[31:26], 6'd0}; // funct6
+          end
+          2'd1: 
+          2'd2: begin // LOAD-FP / STORE-FP
+            assign apu_flags = {3'd0, instr_rdata_i[31:29], 9'd0}; // nf
+          end
+          2'd3: begin // V-CUSTOM
+            assign apu_flags = {15'd0};
+          end
+          default: begin
+            assign apu_flags = {15'd0};
+          end
+        endcase
+      end else begin
+        assign apu_flags = {15'd0};
+      end
 
       // dependency checks
       always_comb begin

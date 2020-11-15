@@ -27,14 +27,15 @@
 
 module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*; import cv32e40p_fpu_pkg::*;
 #(
-  parameter PULP_XPULP        = 1,              // PULP ISA Extension (including PULP specific CSRs and hardware loop, excluding p.elw)
-  parameter PULP_CLUSTER      =  0,
+  parameter PULP_XPULP        = 0,              // PULP ISA Extension (including PULP specific CSRs and hardware loop, excluding p.elw)
+  parameter PULP_CLUSTER      = 0,
   parameter A_EXTENSION       = 0,
   parameter FPU               = 0,
   parameter PULP_SECURE       = 0,
   parameter USE_PMP           = 0,
   parameter APU_WOP_CPU       = 6,
-  parameter DEBUG_TRIGGER_EN  = 1
+  parameter DEBUG_TRIGGER_EN  = 1,
+  parameter GDP_NVPE          = 1
 )
 (
   // singals running to/from controller
@@ -2225,6 +2226,16 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
             default: illegal_insn_o = 1'b1;
           endcase
+        end else if (GDP_NVPE) begin
+          // NVPE connects to APU interface
+          apu_en           = 1'b1;
+          alu_en           = 1'b0;
+          apu_lat_o        = 2'h2; // Number of cycles
+
+          apu_op_o[1:0]    = 2'b00; // OP-V
+          apu_op_o[2]      = instr_rdata_i[25];
+          apu_op_o[3:5]    = instr_rdata_i[14:12];
+
         end else begin
           illegal_insn_o = 1'b1;
         end
