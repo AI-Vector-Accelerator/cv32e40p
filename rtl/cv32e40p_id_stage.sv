@@ -813,7 +813,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
               else 
                 apu_flags = {3'd0, instr_rdata_i[31:26], 6'd0}; // funct6
             end
-            2'd1: 
+            2'd1, 
             2'd2: begin // LOAD-FP / STORE-FP
               apu_flags = {3'd0, instr_rdata_i[31:29], 9'd0}; // nf
             end
