@@ -527,6 +527,7 @@ parameter OP_A_CURRPC      = 3'b001;
 parameter OP_A_IMM         = 3'b010;
 parameter OP_A_REGB_OR_FWD = 3'b011;
 parameter OP_A_REGC_OR_FWD = 3'b100;
+parameter OP_A_INSTRUCTION = 3'b111; // Put instruction data into operand
 
 // immediate a selection
 parameter IMMA_Z      = 1'b0;

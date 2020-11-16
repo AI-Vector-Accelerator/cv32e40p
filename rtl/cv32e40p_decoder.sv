@@ -2236,6 +2236,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           apu_op_o[2]      = instr_rdata_i[25];
           apu_op_o[3:5]    = instr_rdata_i[14:12];
 
+          alu_op_a_mux_sel_o = OP_A_INSTRUCTION;
+
         end else begin
           illegal_insn_o = 1'b1;
         end

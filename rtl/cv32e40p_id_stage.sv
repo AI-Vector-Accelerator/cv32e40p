@@ -605,6 +605,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
       OP_A_REGC_OR_FWD:  alu_operand_a = operand_c_fw_id;
       OP_A_CURRPC:       alu_operand_a = pc_id_i;
       OP_A_IMM:          alu_operand_a = imm_a;
+      OP_A_INSTRUCTION:  alu_operand_a = instr_rdata_i;
       default:           alu_operand_a = operand_a_fw_id;
     endcase; // case (alu_op_a_mux_sel)
   end
