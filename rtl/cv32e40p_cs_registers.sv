@@ -176,7 +176,7 @@ module cv32e40p_cs_registers import cv32e40p_pkg::*;
     | (32'(PULP_SECURE)                << 20)  // U - User mode implemented
     | (32'(PULP_XPULP || PULP_CLUSTER) << 23)  // X - Non-standard extensions present
     | (32'(MXL)                        << 30)  // M-XLEN
-    | (32'(GDP_NVPE)                   << 21)  // V - GDP Neural Vector Processor Subset
+    | (32'(GDP_NVPE)                   << 21); // V - GDP Neural Vector Processor Subset
 
   localparam MHPMCOUNTER_WIDTH  = 64;
 
