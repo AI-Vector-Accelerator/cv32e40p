@@ -807,18 +807,18 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
       end else if(GDP_NVPE == 1) begin
         always_comb begin
           unique case (apu_op[1:0])
-            2'd0: begin // OP-V  
-              if(apu_op[5:3] == 7) 
-                apu_flags = {4'd0, instr_rdata_i[30:20]}; // zimm1
-              else 
-                apu_flags = {3'd0, instr_rdata_i[31:26], 6'd0}; // funct6
+            2'd0: begin // V-CUSTOM  
+              apu_flags = {15'd0};
             end
             2'd1, 
             2'd2: begin // LOAD-FP / STORE-FP
               apu_flags = {3'd0, instr_rdata_i[31:29], 9'd0}; // nf
             end
-            2'd3: begin // V-CUSTOM
-              apu_flags = {15'd0};
+            2'd3: begin // OP-V
+              if(apu_op[5:3] == 7) 
+                apu_flags = {4'd0, instr_rdata_i[30:20]}; // zimm1
+              else 
+                apu_flags = {3'd0, instr_rdata_i[31:26], 6'd0}; // funct6
             end
             default: begin
               apu_flags = {15'd0};
