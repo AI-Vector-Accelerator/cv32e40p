@@ -40,7 +40,8 @@ module cv32e40p_cs_registers import cv32e40p_pkg::*;
   parameter NUM_MHPMCOUNTERS = 1,
   parameter PULP_XPULP       = 0,
   parameter PULP_CLUSTER     = 0,
-  parameter DEBUG_TRIGGER_EN = 1
+  parameter DEBUG_TRIGGER_EN = 1,
+  parameter GDP_NVPE         = 1
 )
 (
   // Clock and Reset
@@ -174,7 +175,8 @@ module cv32e40p_cs_registers import cv32e40p_pkg::*;
     | (0                               << 18)  // S - Supervisor mode implemented
     | (32'(PULP_SECURE)                << 20)  // U - User mode implemented
     | (32'(PULP_XPULP || PULP_CLUSTER) << 23)  // X - Non-standard extensions present
-    | (32'(MXL)                        << 30); // M-XLEN
+    | (32'(MXL)                        << 30)  // M-XLEN
+    | (32'(GDP_NVPE)                   << 21)  // V - GDP Neural Vector Processor Subset
 
   localparam MHPMCOUNTER_WIDTH  = 64;
 

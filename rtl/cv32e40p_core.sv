@@ -34,7 +34,8 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
   parameter PULP_CLUSTER        =  0,                   // PULP Cluster interface (incl. p.elw)
   parameter FPU                 =  0,                   // Floating Point Unit (interfaced via APU interface)
   parameter PULP_ZFINX          =  0,                   // Float-in-General Purpose registers
-  parameter NUM_MHPMCOUNTERS    =  1
+  parameter NUM_MHPMCOUNTERS    =  1,
+  parameter GDP_NVPE            =  1
 )
 (
   // Clock and Reset
@@ -122,7 +123,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
 
   localparam N_HWLP      = 2;
   localparam N_HWLP_BITS = $clog2(N_HWLP);
-  localparam APU         = (FPU==1) ? 1 : 0;
+  localparam APU         = (FPU==1 | GDP_NVPE==1) ? 1 : 0;
 
 
   // IF/ID signals
@@ -529,7 +530,8 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .APU_WOP_CPU                  ( APU_WOP_CPU          ),
     .APU_NDSFLAGS_CPU             ( APU_NDSFLAGS_CPU     ),
     .APU_NUSFLAGS_CPU             ( APU_NUSFLAGS_CPU     ),
-    .DEBUG_TRIGGER_EN             ( DEBUG_TRIGGER_EN     )
+    .DEBUG_TRIGGER_EN             ( DEBUG_TRIGGER_EN     ),
+    .GDP_NVPE                     ( GDP_NVPE             )
   )
   id_stage_i
   (
