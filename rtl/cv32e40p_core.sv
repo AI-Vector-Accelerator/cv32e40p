@@ -757,7 +757,8 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
    .APU_NARGS_CPU    ( APU_NARGS_CPU      ),
    .APU_WOP_CPU      ( APU_WOP_CPU        ),
    .APU_NDSFLAGS_CPU ( APU_NDSFLAGS_CPU   ),
-   .APU_NUSFLAGS_CPU ( APU_NUSFLAGS_CPU   )
+   .APU_NUSFLAGS_CPU ( APU_NUSFLAGS_CPU   ),
+   .GDP_NVPE         ( GDP_NVPE           )
   )
   ex_stage_i
   (
