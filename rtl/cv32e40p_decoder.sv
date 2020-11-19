@@ -2230,7 +2230,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           // NVPE connects to APU interface
           apu_en           = 1'b1;
           alu_en           = 1'b0;
-          apu_lat_o        = 2'h2; // Number of cycles
+          apu_lat_o        = 2'h0; // Number of cycles
 
           apu_op_o[1:0]    = 2'b11; // OP-V
           apu_op_o[2]      = instr_rdata_i[25];
