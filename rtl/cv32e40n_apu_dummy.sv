@@ -37,7 +37,7 @@ module cv32e40n_apu_dummy import cv32e40p_apu_core_pkg::*;
                 apu_rvalid_o = '0;
 
                 if(apu_req_i) // Do we have a transaction request?
-                    next_s = PROC;
+                    next_s = VALID;
                 else
                     next_s = IDLE;
             end
