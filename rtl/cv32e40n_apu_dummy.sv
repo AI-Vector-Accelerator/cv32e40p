@@ -48,7 +48,7 @@ module cv32e40n_apu_dummy import cv32e40p_apu_core_pkg::*;
                 next_s = VALID; // Single Cycle Instruction
             end
             VALID: begin
-                apu_gnt_o = '1;
+                apu_gnt_o = '0;
                 apu_rvalid_o = '1;
 
                 next_s = IDLE;
