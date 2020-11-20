@@ -34,7 +34,7 @@ module cv32e40n_apu_dummy import cv32e40p_apu_core_pkg::*;
         case(current_s)
             IDLE: begin
                 apu_gnt_o = '1;
-                apu_rvalid_o = '1;
+                apu_rvalid_o = '0;
 
                 if(apu_req_i) // Do we have a transaction request?
                     next_s = VALID;
