@@ -41,19 +41,19 @@ module cv32e40n_data_xbar
 
     always_comb begin
         // To Slave
-        data_req_xbr_s1_o    = xbar_master_sync ? data_req_xbr_m2_i   : data_req_xbr_m1_i;
-        data_addr_xbr_s1_o   = xbar_master_sync ? data_addr_xbr_m2_i  : data_addr_xbr_m1_i;
-        data_we_xbr_s1_o     = xbar_master_sync ? data_we_xbr_m2_i    : data_we_xbr_m1_i;
-        data_be_xbr_s1_o     = xbar_master_sync ? data_be_xbr_m2_i    : data_be_xbr_m1_i;
-        data_wdata_xbr_s1_o  = xbar_master_sync ? data_wdata_xbr_m2_i : data_wdata_xbr_m1_i;
+        data_req_xbr_s1_o    = xbar_master_sel ? data_req_xbr_m2_i   : data_req_xbr_m1_i;
+        data_addr_xbr_s1_o   = xbar_master_sel ? data_addr_xbr_m2_i  : data_addr_xbr_m1_i;
+        data_we_xbr_s1_o     = xbar_master_sel ? data_we_xbr_m2_i    : data_we_xbr_m1_i;
+        data_be_xbr_s1_o     = xbar_master_sel ? data_be_xbr_m2_i    : data_be_xbr_m1_i;
+        data_wdata_xbr_s1_o  = xbar_master_sel ? data_wdata_xbr_m2_i : data_wdata_xbr_m1_i;
 
         // To Master
-        data_gnt_xbr_m1_o    = xbar_master_sync ?                 1'b0 : data_gnt_xbr_s1_i;
-        data_rvalid_xbr_m1_o = xbar_master_sync ?                 1'b0 : data_rvalid_xbr_s1_i;
-        data_rdata_xbr_m1_o  = xbar_master_sync ?                32'b0 : data_rdata_xbr_s1_i;
-        data_gnt_xbr_m2_o    = xbar_master_sync ? data_gnt_xbr_s1_i    :  1'b0;
-        data_rvalid_xbr_m2_o = xbar_master_sync ? data_rvalid_xbr_s1_i :  1'b0;
-        data_rdata_xbr_m2_o  = xbar_master_sync ? data_rdata_xbr_s1_i  : 32'b0;
+        data_gnt_xbr_m1_o    = xbar_master_sel ?                 1'b0 : data_gnt_xbr_s1_i;
+        data_rvalid_xbr_m1_o = xbar_master_sel ?                 1'b0 : data_rvalid_xbr_s1_i;
+        data_rdata_xbr_m1_o  = xbar_master_sel ?                32'b0 : data_rdata_xbr_s1_i;
+        data_gnt_xbr_m2_o    = xbar_master_sel ? data_gnt_xbr_s1_i    :  1'b0;
+        data_rvalid_xbr_m2_o = xbar_master_sel ? data_rvalid_xbr_s1_i :  1'b0;
+        data_rdata_xbr_m2_o  = xbar_master_sel ? data_rdata_xbr_s1_i  : 32'b0;
     end
 
 endmodule
