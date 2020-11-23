@@ -12,7 +12,9 @@ module cv32e40n_apu_dummy import cv32e40p_apu_core_pkg::*;
     output logic                            apu_rvalid_o,
     output logic [31:0]                     apu_result_o,
     output logic [APU_NUSFLAGS_CPU-1:0]     apu_flags_o,
-    output logic                            apu_gnt_o);
+    output logic                            apu_gnt_o,
+    
+    output logic                            mem_master_sel);
 
     assign apu_result_o = 'd0;
     assign apu_flags_o  = 'd0;
@@ -30,11 +32,11 @@ module cv32e40n_apu_dummy import cv32e40p_apu_core_pkg::*;
     always_comb begin
         apu_gnt_o = '0;
         apu_rvalid_o = '0;
+        mem_master_sel = '0;
 
         case(current_s)
             IDLE: begin
                 apu_gnt_o = '1;
-                apu_rvalid_o = '0;
 
                 if(apu_req_i) // Do we have a transaction request?
                     next_s = VALID;
@@ -42,18 +44,22 @@ module cv32e40n_apu_dummy import cv32e40p_apu_core_pkg::*;
                     next_s = IDLE;
             end
             PROC: begin
-                apu_gnt_o = '0;
-                apu_rvalid_o = '0;
-
                 next_s = VALID; // Single Cycle Instruction
             end
             VALID: begin
-                apu_gnt_o = '0;
                 apu_rvalid_o = '1;
 
                 next_s = IDLE;
             end
         endcase
+    end
+
+    always_ff @(posedge clk_i, negedge rst_ni) begin
+        if(~rst_ni) begin
+            mem_master_sel <= 1'b0;
+        end else if(apu_op_i[1:0] == 2'd2) begin
+            mem_master_sel <= 1'b1;
+        end
     end
 
 endmodule
