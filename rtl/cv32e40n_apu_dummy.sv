@@ -70,13 +70,13 @@ module cv32e40n_apu_dummy import cv32e40p_apu_core_pkg::*;
         endcase
     end
 
-    always_ff @(posedge clk_i, negedge rst_ni) begin
-        if(~rst_ni) begin
-            mem_master_sel <= 1'b0;
-        end else if(apu_op_i[1:0] == 2'd1) begin
-            mem_master_sel <= 1'b1;
-        end else
-            mem_master_sel <= 1'b0;
+    always_comb begin // @(posedge clk_i, negedge rst_ni) begin
+        //if(~rst_ni)         //    mem_master_sel <= 1'b0;
+        //else 
+        if(apu_op_i[1:0] == 2'd1)
+            mem_master_sel = 1'b1;
+        else
+            mem_master_sel = 1'b0;
     end
 
 endmodule
