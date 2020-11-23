@@ -1942,7 +1942,6 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           rega_used_o         = 1'b1;
 
           alu_op_a_mux_sel_o = OP_A_INSTRUCTION;
-          alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
         // FPU!=1
         end else
           illegal_insn_o = 1'b1;

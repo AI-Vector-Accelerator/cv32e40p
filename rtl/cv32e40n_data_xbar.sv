@@ -48,9 +48,9 @@ module cv32e40n_data_xbar
         data_wdata_xbr_s1_o  = xbar_master_sync ? data_wdata_xbr_m2_i : data_wdata_xbr_m1_i;
 
         // To Master
-        data_gnt_xbr_m1_o    = xbar_master_sync ?  1'b0 : data_gnt_xbr_s1_i;
-        data_rvalid_xbr_m1_o = xbar_master_sync ?  1'b0 : data_rvalid_xbr_s1_i;
-        data_rdata_xbr_m1_o  = xbar_master_sync ? 32'b0 : data_rdata_xbr_s1_i;
+        data_gnt_xbr_m1_o    = xbar_master_sync ?                 1'b0 : data_gnt_xbr_s1_i;
+        data_rvalid_xbr_m1_o = xbar_master_sync ?                 1'b0 : data_rvalid_xbr_s1_i;
+        data_rdata_xbr_m1_o  = xbar_master_sync ?                32'b0 : data_rdata_xbr_s1_i;
         data_gnt_xbr_m2_o    = xbar_master_sync ? data_gnt_xbr_s1_i    :  1'b0;
         data_rvalid_xbr_m2_o = xbar_master_sync ? data_rvalid_xbr_s1_i :  1'b0;
         data_rdata_xbr_m2_o  = xbar_master_sync ? data_rdata_xbr_s1_i  : 32'b0;
