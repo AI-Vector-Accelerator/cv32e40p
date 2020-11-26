@@ -1929,21 +1929,22 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
                      else illegal_insn_o = 1'b1;
             default: illegal_insn_o = 1'b1;
           endcase
-        end else if (GDP_NVPE) begin
+        end /* else if (GDP_NVPE) begin
           // NVPE connects to APU interface
           apu_en           = 1'b1;
           alu_en           = 1'b0;
-          apu_lat_o        = 2'h0; // Number of cycles
+          apu_lat_o        = 2'h1; // Number of cycles
 
           apu_op_o[1:0]    = 2'b01; // LOAD-FP
           apu_op_o[2]      = instr_rdata_i[25];
           apu_op_o[5:3]    = instr_rdata_i[14:12];
 
-          rega_used_o         = 1'b1;
+          //rega_used_o         = 1'b1;
 
           alu_op_a_mux_sel_o = OP_A_INSTRUCTION;
         // FPU!=1
-        end else
+        end*/
+        else
           illegal_insn_o = 1'b1;
       end
 
@@ -2248,10 +2249,14 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           apu_op_o[2]      = instr_rdata_i[25];
           apu_op_o[5:3]    = instr_rdata_i[14:12];
 
-          rega_used_o         = 1'b1;
+          rega_used_o      = 1'b1;
+          regb_used_o      = 1'b1;
 
           alu_op_a_mux_sel_o = OP_A_INSTRUCTION;
           alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
+          alu_op_c_mux_sel_o = OP_C_REGB_OR_FWD;
+
+          regfile_mem_we_o = 1'b1;
 
         end else begin
           illegal_insn_o = 1'b1;
