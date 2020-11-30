@@ -221,6 +221,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
 
     // Wakeup Signal
     output logic        wake_from_sleep_o,
+    input logic         accelerator_ready,
 
     // Forward Signals
     input  logic [5:0]  regfile_waddr_wb_i,
@@ -1223,6 +1224,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
 
     // Wakeup Signal
     .wake_from_sleep_o              ( wake_from_sleep_o      ),
+    .accelerator_ready              ( accelerator_ready      ),
 
     // CSR Controller Signals
     .csr_save_cause_o               ( csr_save_cause_o       ),

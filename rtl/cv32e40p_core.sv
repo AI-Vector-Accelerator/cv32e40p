@@ -712,6 +712,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
 
     // Wakeup Signal
     .wake_from_sleep_o            ( wake_from_sleep      ),
+    .accelerator_ready            ( apu_rvalid_i         ), // Bit of a hack
 
     // Forward Signals
     .regfile_waddr_wb_i           ( regfile_waddr_fw_wb_o),  // Write address ex-wb pipeline

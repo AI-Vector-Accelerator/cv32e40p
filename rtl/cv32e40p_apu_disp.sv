@@ -200,7 +200,7 @@ module cv32e40p_apu_disp (
   // so we stall if: (apu_lat_i = 1 & apu_lat = 2/3) | (apu_lat_i = 2 & apu_lat = 3) | (apu_lat_i = 3 (multicycle))
   assign stall_type      = enable_i  & active & ((apu_lat_i==2'h1) | ((apu_lat_i==2'h2) & (apu_lat==2'h3)) | (apu_lat_i==2'h3));
   assign stall_nack      = valid_req & !apu_gnt_i;
-  assign stall_o         = stall_full | stall_type | stall_nack;
+  assign stall_o         = stall_full | stall_type | stall_nack | ~apu_gnt_i;
 
   //
   // Generate Apu_master request
