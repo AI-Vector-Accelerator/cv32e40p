@@ -1939,7 +1939,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           apu_op_o[2]         = instr_rdata_i[25];
           apu_op_o[5:3]       = instr_rdata_i[14:12];
 
-          regfile_mem_we = 1'b1;
+          regfile_mem_we = 1'b0;
 
           //rega_used_o      = 1'b1;
           regb_used_o      = 1'b1;
@@ -2255,7 +2255,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
           regb_used_o      = 1'b1;
           regc_used_o      = 1'b1;
-          regc_mux_o       = REGC_S4;
+          regc_mux_o       = REGC_RD;
 
           alu_op_a_mux_sel_o = OP_A_INSTRUCTION;
           alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
