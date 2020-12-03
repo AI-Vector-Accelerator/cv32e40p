@@ -143,7 +143,6 @@ module cv32e40p_controller import cv32e40p_pkg::*;
 
   // Wakeup Signal
   output logic        wake_from_sleep_o,
-  input logic         accelerator_ready,
 
   output logic        csr_save_if_o,
   output logic        csr_save_id_o,
@@ -1431,7 +1430,7 @@ endgenerate
   end
 
   // wakeup from sleep conditions
-  assign wake_from_sleep_o = irq_wu_ctrl_i || debug_req_pending || debug_mode_q || accelerator_ready;
+  assign wake_from_sleep_o = irq_wu_ctrl_i || debug_req_pending || debug_mode_q;
 
   // debug mode
   assign debug_mode_o = debug_mode_q;

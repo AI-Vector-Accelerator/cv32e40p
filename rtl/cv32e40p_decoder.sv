@@ -132,6 +132,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   output logic [1:0]  data_sign_extension_o,   // sign extension on read data from data memory / NaN boxing
   output logic [1:0]  data_reg_offset_o,       // offset in byte inside register for stores
   output logic        data_load_event_o,       // data request is in the special event range
+  input  logic        data_ready_i,            // Additional signal for single instruction apu loads
+  output logic        data_load_o,          
 
   // Atomic memory access
   output  logic [5:0] atop_o,
@@ -1910,9 +1912,6 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           imm_b_mux_sel_o     = IMMB_I;
           alu_op_b_mux_sel_o  = OP_B_IMM;
 
-          // NaN boxing
-          data_sign_extension_o = 2'b10;
-
           // Decode data type
           unique case (instr_rdata_i[14:12])
             // flb - FP8 load
@@ -1932,20 +1931,24 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
         end else if (GDP_NVPE) begin
           // NVPE connects to APU interface
           apu_en              = 1'b1;
-          alu_en              = 1'b0;
-          apu_lat_o           = 2'h3; // Number of cycles
+          alu_en              = 1'b1;
+          apu_lat_o           = 2'h3;  // Number of cycles
 
           apu_op_o[1:0]       = 2'b01; // LOAD-FP
           apu_op_o[2]         = instr_rdata_i[25];
           apu_op_o[5:3]       = instr_rdata_i[14:12];
 
-          regfile_mem_we = 1'b0;
+          alu_op_a_mux_sel_o  = OP_A_REGA_OR_FWD;
+          //rega_used_o         = 1'b1;  // Register A contains address
+          regfile_mem_we      = 1'b0;  // Not writing to register file
+          prepost_useincr_o   = 1'b0;  // Use operand a as address
+          data_req            = 1'b1;  // Request Data Access
+          data_load_o         = 1'b1;
 
-          //rega_used_o      = 1'b1;
-          regb_used_o      = 1'b1;
+          //regb_used_o         = 1'b1;  
+          alu_op_b_mux_sel_o = OP_B_REGB_OR_FWD;
 
-          alu_op_a_mux_sel_o  = OP_A_INSTRUCTION;
-          alu_op_b_mux_sel_o  = OP_B_REGA_OR_FWD;
+          alu_op_c_mux_sel_o  = OP_C_INSTRUCTION;
         // FPU!=1
         end
         else
@@ -2247,18 +2250,20 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           // NVPE connects to APU interface
           apu_en           = 1'b1;
           alu_en           = 1'b0;
-          apu_lat_o        = 2'h0; // Number of cycles
+          apu_lat_o        = 2'h3; // Number of cycles
 
           apu_op_o[1:0]    = 2'b11; // OP-V
           apu_op_o[2]      = instr_rdata_i[25];
           apu_op_o[5:3]    = instr_rdata_i[14:12];
 
+          rega_used_o      = 1'b1;
           regb_used_o      = 1'b1;
           regc_used_o      = 1'b1;
           regc_mux_o       = REGC_RD;
 
-          alu_op_a_mux_sel_o = OP_A_INSTRUCTION;
-          alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
+          alu_op_a_mux_sel_o = OP_A_REGA_OR_FWD;
+          alu_op_b_mux_sel_o = OP_B_REGB_OR_FWD;
+          alu_op_c_mux_sel_o = OP_C_INSTRUCTION;
 
           regfile_mem_we = 1'b1;
           regfile_alu_we = 1'b1;

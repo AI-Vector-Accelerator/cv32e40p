@@ -264,6 +264,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
   logic        p_elw_finish;            // Finish of p.elw load (when data_rvalid_i is received)
 
   logic [31:0] lsu_rdata;
+  logic data_load;
 
   // stall control
   logic        halt_if;
@@ -686,6 +687,10 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .data_err_i                   ( data_err_pmp         ),
     .data_err_ack_o               ( data_err_ack         ),
 
+    .data_ready_i                 ( data_rvalid_i ),
+    .data_rdata_i                 ( lsu_rdata ),
+    .data_load_o                  ( data_load ),
+
     // Interrupt Signals
     .irq_i                        ( irq_i                ),
     .irq_sec_i                    ( (PULP_SECURE) ? irq_sec_i : 1'b0 ),
@@ -712,8 +717,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
 
     // Wakeup Signal
     .wake_from_sleep_o            ( wake_from_sleep      ),
-    .accelerator_ready            ( apu_rvalid_i         ), // Bit of a hack
-
+    
     // Forward Signals
     .regfile_waddr_wb_i           ( regfile_waddr_fw_wb_o),  // Write address ex-wb pipeline
     .regfile_we_wb_i              ( regfile_we_wb        ),  // write enable for the register file
@@ -837,6 +841,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
 
     .lsu_en_i                   ( data_req_ex                  ),
     .lsu_rdata_i                ( lsu_rdata                    ),
+    .data_load_i                ( data_load & data_rvalid_i ),               
 
     // interface with CSRs
     .csr_access_i               ( csr_access_ex                ),

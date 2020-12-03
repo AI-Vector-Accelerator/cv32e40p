@@ -184,6 +184,9 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     output logic [1:0]  data_sign_ext_ex_o,
     output logic [1:0]  data_reg_offset_ex_o,
     output logic        data_load_event_ex_o,
+    input  logic        data_ready_i,
+    input  logic [31:0] data_rdata_i,
+    output  logic        data_load_o,
 
     output logic        data_misaligned_ex_o,
 
@@ -221,7 +224,6 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
 
     // Wakeup Signal
     output logic        wake_from_sleep_o,
-    input logic         accelerator_ready,
 
     // Forward Signals
     input  logic [5:0]  regfile_waddr_wb_i,
@@ -607,6 +609,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
       OP_A_CURRPC:       alu_operand_a = pc_id_i;
       OP_A_IMM:          alu_operand_a = imm_a;
       OP_A_INSTRUCTION:  alu_operand_a = instr_rdata_i;
+      OP_A_RDATA:        alu_operand_a = data_rdata_i;
       default:           alu_operand_a = operand_a_fw_id;
     endcase; // case (alu_op_a_mux_sel)
   end
@@ -709,6 +712,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
       OP_C_REGC_OR_FWD:  operand_c = operand_c_fw_id;
       OP_C_REGB_OR_FWD:  operand_c = operand_b_fw_id;
       OP_C_JT:           operand_c = jump_target;
+      OP_C_INSTRUCTION:  operand_c = instr_rdata_i;
       default:           operand_c = operand_c_fw_id;
     endcase // case (alu_op_c_mux_sel)
   end
@@ -1080,6 +1084,9 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     .data_reg_offset_o               ( data_reg_offset_id        ),
     .data_load_event_o               ( data_load_event_id        ),
 
+    .data_ready_i                    ( data_ready_i ),
+    .data_load_o                     ( data_load_o  ),
+
     // Atomic memory access
     .atop_o                          ( atop_id                   ),
 
@@ -1224,7 +1231,6 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
 
     // Wakeup Signal
     .wake_from_sleep_o              ( wake_from_sleep_o      ),
-    .accelerator_ready              ( accelerator_ready      ),
 
     // CSR Controller Signals
     .csr_save_cause_o               ( csr_save_cause_o       ),

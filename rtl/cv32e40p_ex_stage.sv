@@ -114,6 +114,7 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
 
   input  logic        lsu_en_i,
   input  logic [31:0] lsu_rdata_i,
+  input  logic        data_load_i,
 
   // input from ID stage
   input  logic        branch_in_ex_i,
@@ -184,8 +185,13 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     regfile_alu_we_fw_o    = '0;
     wb_contention          = 1'b0;
 
+    if (apu_op_o[1:0] == 2'b01 & apu_valid) begin // Prevent writeback for LOAD-FP
+      regfile_alu_we_fw_o    = 1'b1;
+      regfile_alu_waddr_fw_o = 5'd0;
+      regfile_alu_wdata_fw_o = 32'd0;
+    end
     // APU single cycle operations, and multicycle operations (>2cycles) are written back on ALU port
-    if (apu_valid & (apu_singlecycle | apu_multicycle)) begin
+    else if (apu_valid & (apu_singlecycle | apu_multicycle)) begin
       regfile_alu_we_fw_o    = 1'b1;
       regfile_alu_waddr_fw_o = apu_waddr;
       regfile_alu_wdata_fw_o = apu_result;
@@ -307,89 +313,70 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     .ex_ready_i      ( ex_ready_o           )
   );
 
-   generate
-      if (FPU == 1 | GDP_NVPE == 1) begin : gen_apu
-         ////////////////////////////////////////////////////
-         //     _    ____  _   _   ____ ___ ____  ____     //
-         //    / \  |  _ \| | | | |  _ \_ _/ ___||  _ \    //
-         //   / _ \ | |_) | | | | | | | | |\___ \| |_) |   //
-         //  / ___ \|  __/| |_| | | |_| | | ___) |  __/    //
-         // /_/   \_\_|    \___/  |____/___|____/|_|       //
-         //                                                //
-         ////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////
+  //     _    ____  _   _   ____ ___ ____  ____     //
+  //    / \  |  _ \| | | | |  _ \_ _/ ___||  _ \    //
+  //   / _ \ | |_) | | | | | | | | |\___ \| |_) |   //
+  //  / ___ \|  __/| |_| | | |_| | | ___) |  __/    //
+  // /_/   \_\_|    \___/  |____/___|____/|_|       //
+  //                                                //
+  ////////////////////////////////////////////////////
 
-         cv32e40p_apu_disp apu_disp_i
-         (
-         .clk_i              ( clk                            ),
-         .rst_ni             ( rst_n                          ),
+  cv32e40p_apu_disp apu_disp_i
+  (
+  .clk_i              ( clk                            ),
+  .rst_ni             ( rst_n                          ),
 
-         .enable_i           ( apu_en_i                       ),
-         .apu_lat_i          ( apu_lat_i                      ),
-         .apu_waddr_i        ( apu_waddr_i                    ),
+  .enable_i           ( apu_en_i                       ),
+  .apu_lat_i          ( apu_lat_i                      ),
+  .apu_waddr_i        ( apu_waddr_i                    ),
 
-         .apu_waddr_o        ( apu_waddr                      ),
-         .apu_multicycle_o   ( apu_multicycle                 ),
-         .apu_singlecycle_o  ( apu_singlecycle                ),
+  .apu_waddr_o        ( apu_waddr                      ),
+  .apu_multicycle_o   ( apu_multicycle                 ),
+  .apu_singlecycle_o  ( apu_singlecycle                ),
 
-         .active_o           ( apu_active                     ),
-         .stall_o            ( apu_stall                      ),
+  .active_o           ( apu_active                     ),
+  .stall_o            ( apu_stall                      ),
 
-         .is_decoding_i      ( is_decoding_i                  ),
-         .read_regs_i        ( apu_read_regs_i                ),
-         .read_regs_valid_i  ( apu_read_regs_valid_i          ),
-         .read_dep_o         ( apu_read_dep_o                 ),
-         .write_regs_i       ( apu_write_regs_i               ),
-         .write_regs_valid_i ( apu_write_regs_valid_i         ),
-         .write_dep_o        ( apu_write_dep_o                ),
+  .is_decoding_i      ( is_decoding_i                  ),
+  .read_regs_i        ( apu_read_regs_i                ),
+  .read_regs_valid_i  ( apu_read_regs_valid_i          ),
+  .read_dep_o         ( apu_read_dep_o                 ),
+  .write_regs_i       ( apu_write_regs_i               ),
+  .write_regs_valid_i ( apu_write_regs_valid_i         ),
+  .write_dep_o        ( apu_write_dep_o                ),
 
-         .perf_type_o        ( apu_perf_type_o                ),
-         .perf_cont_o        ( apu_perf_cont_o                ),
+  .perf_type_o        ( apu_perf_type_o                ),
+  .perf_cont_o        ( apu_perf_cont_o                ),
 
-         // apu-interconnect
-         // handshake signals
-         .apu_req_o          ( apu_req                        ),
-         .apu_gnt_i          ( apu_gnt                        ),
-         // response channel
-         .apu_rvalid_i       ( apu_valid                      )
-         );
+  // apu-interconnect
+  // handshake signals
+  .apu_req_o          ( apu_req                        ),
+  .apu_gnt_i          ( apu_gnt                        ),
+  // response channel
+  .apu_rvalid_i       ( apu_valid                      )
+  );
 
-         assign apu_perf_wb_o  = wb_contention | wb_contention_lsu;
-         assign apu_ready_wb_o = ~(apu_active | apu_en_i | apu_stall) | apu_valid;
+  assign apu_perf_wb_o  = wb_contention | wb_contention_lsu;
+  assign apu_ready_wb_o = ~(apu_active | apu_en_i | apu_stall) | apu_valid;
 
-         assign apu_req_o       = apu_req;
-         assign apu_gnt         = apu_gnt_i;
-         assign apu_valid       = apu_rvalid_i;
-         assign apu_operands_o  = apu_operands_i;
-         assign apu_op_o        = apu_op_i;
-         assign apu_result      = apu_result_i;
-         assign fpu_fflags_we_o = apu_valid;
-      end
-      else begin : gen_no_apu
-         // default assignements for the case when no FPU/APU is attached.
-         assign apu_req_o         = '0;
-         assign apu_operands_o[0] = '0;
-         assign apu_operands_o[1] = '0;
-         assign apu_operands_o[2] = '0;
-         assign apu_op_o          = '0;
-         assign apu_req           = 1'b0;
-         assign apu_gnt           = 1'b0;
-         assign apu_result        = 32'b0;
-         assign apu_valid         = 1'b0;
-         assign apu_waddr         = 6'b0;
-         assign apu_stall         = 1'b0;
-         assign apu_active        = 1'b0;
-         assign apu_ready_wb_o    = 1'b1;
-         assign apu_perf_wb_o     = 1'b0;
-         assign apu_perf_cont_o   = 1'b0;
-         assign apu_perf_type_o   = 1'b0;
-         assign apu_singlecycle   = 1'b0;
-         assign apu_multicycle    = 1'b0;
-         assign apu_read_dep_o    = 1'b0;
-         assign apu_write_dep_o   = 1'b0;
-         assign fpu_fflags_we_o   = 1'b0;
+  assign apu_req_o       = apu_req;
+  assign apu_gnt         = apu_gnt_i;
+  assign apu_valid       = apu_rvalid_i;
 
-      end
-   endgenerate
+  always_comb begin
+    if(apu_op_o[1:0] == 2'b01) begin
+      apu_operands_o[0] = lsu_rdata_i;
+      apu_operands_o[1] = apu_operands_i[1];
+      apu_operands_o[2] = apu_operands_i[2];
+    end else begin
+      apu_operands_o    = apu_operands_i;  
+    end
+  end
+  
+  assign apu_op_o        = apu_op_i;
+  assign apu_result      = apu_result_i;
+  assign fpu_fflags_we_o = apu_valid;
 
    assign apu_busy_o = apu_active;
 

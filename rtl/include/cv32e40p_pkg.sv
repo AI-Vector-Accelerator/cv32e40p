@@ -527,6 +527,7 @@ parameter OP_A_CURRPC      = 3'b001;
 parameter OP_A_IMM         = 3'b010;
 parameter OP_A_REGB_OR_FWD = 3'b011;
 parameter OP_A_REGC_OR_FWD = 3'b100;
+parameter OP_A_RDATA       = 3'b110;
 parameter OP_A_INSTRUCTION = 3'b111; // Put instruction data into operand
 
 // immediate a selection
@@ -576,6 +577,7 @@ parameter MIMM_S3      = 1'b1;
 parameter OP_C_REGC_OR_FWD = 2'b00;
 parameter OP_C_REGB_OR_FWD = 2'b01;
 parameter OP_C_JT          = 2'b10;
+parameter OP_C_INSTRUCTION = 3'b11; // Put instruction data into operand
 
 // branch types
 parameter BRANCH_NONE = 2'b00;
