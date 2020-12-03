@@ -111,6 +111,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   output logic [APU_WOP_CPU-1:0]  apu_op_o,
   output logic [1:0]          apu_lat_o,
   output logic [2:0]          fp_rnd_mode_o,
+  output logic                apu_regfile_wb_o,
 
   // register file related signals
   output logic        regfile_mem_we_o,        // write enable for regfile
@@ -231,6 +232,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
     regfile_mem_we              = 1'b0;
     regfile_alu_we              = 1'b0;
     regfile_alu_waddr_sel_o     = 1'b1;
+    apu_regfile_wb_o            = 1'b1;
 
     prepost_useincr_o           = 1'b1;
 
@@ -1932,23 +1934,25 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           // NVPE connects to APU interface
           apu_en              = 1'b1;
           alu_en              = 1'b1;
-          apu_lat_o           = 2'h3;  // Number of cycles
+          apu_lat_o           = 2'h1;  // Number of cycles
 
           apu_op_o[1:0]       = 2'b01; // LOAD-FP
           apu_op_o[2]         = instr_rdata_i[25];
           apu_op_o[5:3]       = instr_rdata_i[14:12];
 
           alu_op_a_mux_sel_o  = OP_A_REGA_OR_FWD;
-          //rega_used_o         = 1'b1;  // Register A contains address
+          rega_used_o         = 1'b0;  // Register A contains address
           regfile_mem_we      = 1'b0;  // Not writing to register file
           prepost_useincr_o   = 1'b0;  // Use operand a as address
           data_req            = 1'b1;  // Request Data Access
           data_load_o         = 1'b1;
 
-          //regb_used_o         = 1'b1;  
+          regb_used_o         = 1'b0;  
           alu_op_b_mux_sel_o = OP_B_REGB_OR_FWD;
 
           alu_op_c_mux_sel_o  = OP_C_INSTRUCTION;
+
+          apu_regfile_wb_o = 1'b0;
         // FPU!=1
         end
         else
@@ -2250,7 +2254,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           // NVPE connects to APU interface
           apu_en           = 1'b1;
           alu_en           = 1'b0;
-          apu_lat_o        = 2'h3; // Number of cycles
+          //apu_lat_o        = 2'h3; // Number of cycles
 
           apu_op_o[1:0]    = 2'b11; // OP-V
           apu_op_o[2]      = instr_rdata_i[25];

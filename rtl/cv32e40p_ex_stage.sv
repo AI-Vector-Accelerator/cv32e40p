@@ -138,6 +138,7 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
   output logic  [5:0] regfile_alu_waddr_fw_o,
   output logic        regfile_alu_we_fw_o,
   output logic [31:0] regfile_alu_wdata_fw_o,    // forward to RF and ID/EX pipe, ALU & MUL
+  input logic apu_regfile_wb_i,
 
   // To IF: Jump and branch target and decision
   output logic [31:0] jump_target_o,
@@ -150,7 +151,9 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
 
   output logic        ex_ready_o, // EX stage ready for new data
   output logic        ex_valid_o, // EX stage gets new data
-  input  logic        wb_ready_i  // WB stage ready for new data
+  input  logic        wb_ready_i,  // WB stage ready for new data
+
+  output logic        apu_stall_o // Feed apu stall to decode
 );
 
   logic [31:0]    alu_result;
@@ -185,10 +188,11 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     regfile_alu_we_fw_o    = '0;
     wb_contention          = 1'b0;
 
-    if (apu_op_o[1:0] == 2'b01 & apu_valid) begin // Prevent writeback for LOAD-FP
-      regfile_alu_we_fw_o    = 1'b1;
+    if (apu_op_o[1:0] == 2'b01 & (apu_valid | apu_stall)) begin // Prevent writeback for LOAD-FP
+      regfile_alu_we_fw_o    = 1'b0;
       regfile_alu_waddr_fw_o = 5'd0;
       regfile_alu_wdata_fw_o = 32'd0;
+      wb_contention          = 1'b1;
     end
     // APU single cycle operations, and multicycle operations (>2cycles) are written back on ALU port
     else if (apu_valid & (apu_singlecycle | apu_multicycle)) begin
@@ -222,15 +226,16 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     if (regfile_we_lsu) begin
       regfile_we_wb_o = 1'b1;
       if (apu_valid & (!apu_singlecycle & !apu_multicycle)) begin
-         wb_contention_lsu = 1'b1;
+        wb_contention_lsu = 1'b1;
       end
-    // APU two-cycle operations are written back on LSU port
-    end else if (apu_valid & (!apu_singlecycle & !apu_multicycle)) begin
-      regfile_we_wb_o    = 1'b1;
-      regfile_waddr_wb_o = apu_waddr;
-      regfile_wdata_wb_o = apu_result;
+      // APU two-cycle operations are written back on LSU port
+    end else if (apu_valid & (!apu_singlecycle & !apu_multicycle) & apu_regfile_wb_i) begin
+        regfile_we_wb_o    = 1'b1;
+        regfile_waddr_wb_o = apu_waddr;
+        regfile_wdata_wb_o = apu_result;
     end
   end
+
 
   // branch handling
   assign branch_decision_o = alu_cmp_result;
@@ -405,6 +410,8 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
       end
     end
   end
+
+  assign apu_stall_o = apu_stall;
 
   // As valid always goes to the right and ready to the left, and we are able
   // to finish branches without going to the WB stage, ex_valid does not

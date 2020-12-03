@@ -279,6 +279,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
   logic        lsu_ready_wb;
 
   logic        apu_ready_wb;
+  logic        apu_stall;
 
   // Signals between instruction core interface and pipe (if and id stages)
   logic        instr_req_int;    // Id stage asserts a req to instruction core interface
@@ -357,6 +358,8 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
   logic                             instr_gnt_pmp;
   logic [31:0]                      instr_addr_pmp;
   logic                             instr_err_pmp;
+
+  logic                             apu_regfile_wb_ex;
 
   // Mux selector for vectored IRQ PC
   assign m_exc_vec_pc_mux_id = (mtvec_mode == 2'b0) ? 5'h0 : exc_cause;
@@ -500,7 +503,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .jump_target_ex_i    ( jump_target_ex    ),
 
     // pipeline stalls
-    .halt_if_i           ( halt_if           ),
+    .halt_if_i           ( halt_if | apu_en_ex_o ),
     .id_ready_i          ( id_ready          ),
 
     .if_busy_o           ( if_busy           ),
@@ -603,6 +606,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
 
     .regfile_alu_we_ex_o          ( regfile_alu_we_ex    ),
     .regfile_alu_waddr_ex_o       ( regfile_alu_waddr_ex ),
+    .apu_regfile_wb_ex_o          ( apu_regfile_wb_ex    ),
 
     // MUL
     .mult_operator_ex_o           ( mult_operator_ex     ), // from ID to EX stage
@@ -876,7 +880,10 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
 
     .ex_ready_o                 ( ex_ready                     ),
     .ex_valid_o                 ( ex_valid                     ),
-    .wb_ready_i                 ( lsu_ready_wb                 )
+    .wb_ready_i                 ( lsu_ready_wb                 ),
+
+    .apu_stall_o                ( apu_stall ),
+    .apu_regfile_wb_i           ( apu_regfile_wb_ex )
   );
 
 

@@ -229,6 +229,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     input  logic [5:0]  regfile_waddr_wb_i,
     input  logic        regfile_we_wb_i,
     input  logic [31:0] regfile_wdata_wb_i, // From wb_stage: selects data from data memory, ex_stage result and sp rdata
+    output logic        apu_regfile_wb_ex_o,
 
     input  logic [5:0]  regfile_alu_waddr_fw_i,
     input  logic        regfile_alu_we_fw_i,
@@ -484,6 +485,8 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
   logic        id_valid_q;
   logic        minstret;
   logic        perf_pipeline_stall;
+
+  logic apu_regfile_wb;
 
   assign instr = instr_rdata_i;
 
@@ -1068,6 +1071,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     .regfile_alu_we_o                ( regfile_alu_we_id         ),
     .regfile_alu_we_dec_o            ( regfile_alu_we_dec_id     ),
     .regfile_alu_waddr_sel_o         ( regfile_alu_waddr_mux_sel ),
+    .apu_regfile_wb_o                ( apu_regfile_wb ),
 
     // CSR control signals
     .csr_access_o                    ( csr_access                ),
@@ -1253,7 +1257,6 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     .regfile_we_ex_i                ( regfile_we_ex_o        ),
     .regfile_waddr_ex_i             ( regfile_waddr_ex_o     ),
     .regfile_we_wb_i                ( regfile_we_wb_i        ),
-
     // regfile port 2
     .regfile_alu_we_fw_i            ( regfile_alu_we_fw_i    ),
 
@@ -1489,7 +1492,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
       apu_operands_ex_o[2]        <= '0;
       apu_flags_ex_o              <= '0;
       apu_waddr_ex_o              <= '0;
-
+      apu_regfile_wb_ex_o         <= '0;
 
       regfile_waddr_ex_o          <= 6'b0;
       regfile_we_ex_o             <= 1'b0;
@@ -1588,6 +1591,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
           apu_operands_ex_o         <= apu_operands;
           apu_flags_ex_o            <= apu_flags;
           apu_waddr_ex_o            <= apu_waddr;
+          apu_regfile_wb_ex_o       <= apu_regfile_wb;
         end
 
         regfile_we_ex_o             <= regfile_we_id;
