@@ -153,6 +153,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   output logic [1:0]  ctrl_transfer_insn_in_id_o,   // control transfer instructio is decoded
   output logic [1:0]  ctrl_transfer_target_mux_sel_o,        // jump target selection
 
+  output logic data_load_vector_o,
+
   // HPM related control signals
   input  logic [31:0] mcounteren_i
 );
@@ -171,6 +173,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   logic       mult_int_en;
   logic       mult_dot_en;
   logic       apu_en;
+  logic       data_load_vector;
 
   // this instruction needs floating-point rounding-mode verification
   logic check_fprm;
@@ -285,6 +288,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
     mret_dec_o                  = 1'b0;
     uret_dec_o                  = 1'b0;
     dret_dec_o                  = 1'b0;
+
+    data_load_vector            = 1'b0;
 
     unique case (instr_rdata_i[6:0])
 
@@ -1934,25 +1939,25 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           // NVPE connects to APU interface
           apu_en              = 1'b1;
           alu_en              = 1'b1;
-          apu_lat_o           = 2'h1;  // Number of cycles
+          apu_lat_o           = 2'h3;  // Number of cycles
 
           apu_op_o[1:0]       = 2'b01; // LOAD-FP
           apu_op_o[2]         = instr_rdata_i[25];
           apu_op_o[5:3]       = instr_rdata_i[14:12];
 
           alu_op_a_mux_sel_o  = OP_A_REGA_OR_FWD;
-          rega_used_o         = 1'b0;  // Register A contains address
+          rega_used_o         = 1'b1;  // Register A contains address
           regfile_mem_we      = 1'b0;  // Not writing to register file
           prepost_useincr_o   = 1'b0;  // Use operand a as address
-          data_req            = 1'b1;  // Request Data Access
-          data_load_o         = 1'b1;
+          //data_req            = 1'b1;  // Request Data Access
 
-          regb_used_o         = 1'b0;  
-          alu_op_b_mux_sel_o = OP_B_REGB_OR_FWD;
-
+          regb_used_o         = 1'b1;  
+          alu_op_b_mux_sel_o  = OP_B_REGB_OR_FWD;
           alu_op_c_mux_sel_o  = OP_C_INSTRUCTION;
 
-          apu_regfile_wb_o = 1'b0;
+          data_load_vector    = 1'b1;
+
+          apu_regfile_wb_o    = 1'b0;
         // FPU!=1
         end
         else
@@ -2271,6 +2276,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
           regfile_mem_we = 1'b1;
           regfile_alu_we = 1'b1;
+
 
         end else begin
           illegal_insn_o = 1'b1;
@@ -2671,6 +2677,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   assign hwlp_we_o                   = (deassert_we_i) ? 3'b0          : hwlp_we;
   assign csr_op_o                    = (deassert_we_i) ? CSR_OP_READ   : csr_op;
   assign ctrl_transfer_insn_in_id_o  = (deassert_we_i) ? BRANCH_NONE   : ctrl_transfer_insn;
+  assign data_load_vector_o          = (deassert_we_i) ? 1'b0          : data_load_vector;
 
   assign ctrl_transfer_insn_in_dec_o  = ctrl_transfer_insn;
   assign regfile_alu_we_dec_o         = regfile_alu_we;

@@ -369,15 +369,15 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
   assign apu_gnt         = apu_gnt_i;
   assign apu_valid       = apu_rvalid_i;
 
-  always_comb begin
-    if(apu_op_o[1:0] == 2'b01) begin
-      apu_operands_o[0] = lsu_rdata_i;
-      apu_operands_o[1] = apu_operands_i[1];
-      apu_operands_o[2] = apu_operands_i[2];
-    end else begin
-      apu_operands_o    = apu_operands_i;  
-    end
-  end
+  //always_comb begin
+  //  if(apu_op_o[1:0] == 2'b01) begin
+  //    apu_operands_o[0] = lsu_rdata_i;
+  //    apu_operands_o[1] = apu_operands_i[1];
+  //    apu_operands_o[2] = apu_operands_i[2];
+  //  end else begin
+  assign apu_operands_o = apu_operands_i;  
+  //  end
+  //
   
   assign apu_op_o        = apu_op_i;
   assign apu_result      = apu_result_i;

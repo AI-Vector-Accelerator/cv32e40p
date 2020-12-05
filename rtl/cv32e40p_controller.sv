@@ -199,7 +199,9 @@ module cv32e40p_controller import cv32e40p_pkg::*;
   input  logic        wb_ready_i,                 // WB stage is ready
 
   // Performance Counters
-  output logic        perf_pipeline_stall_o       // stall due to elw extra cycles
+  output logic        perf_pipeline_stall_o,       // stall due to elw extra cycles
+
+  input logic data_load_vector_i
 );
 
   // FSM state encoding
@@ -1320,12 +1322,11 @@ endgenerate
 
     // Stall because of load operation
     if (
-          ( (data_req_ex_i == 1'b1) && (regfile_we_ex_i == 1'b1) ||
+          ( ((data_req_ex_i == 1'b1) && (regfile_we_ex_i == 1'b1) ||
            (wb_ready_i == 1'b0) && (regfile_we_wb_i == 1'b1)
           ) &&
           ( (reg_d_ex_is_reg_a_i == 1'b1) || (reg_d_ex_is_reg_b_i == 1'b1) || (reg_d_ex_is_reg_c_i == 1'b1) ||
-            (is_decoding_o && (regfile_we_id_i && !data_misaligned_i) && (regfile_waddr_ex_i == regfile_alu_waddr_id_i)) )
-       )
+            (is_decoding_o && (regfile_we_id_i && !data_misaligned_i) && (regfile_waddr_ex_i == regfile_alu_waddr_id_i)))) | (data_load_vector_i == 1'b1) )
     begin
       deassert_we_o   = 1'b1;
       load_stall_o    = 1'b1;

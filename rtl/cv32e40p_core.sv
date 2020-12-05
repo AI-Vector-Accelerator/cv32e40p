@@ -259,6 +259,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
   logic        data_req_ex;
   logic        data_load_event_ex;
   logic        data_misaligned_ex;
+  logic        data_load_vector;
 
   logic        p_elw_start;             // Start of p.elw load (when data_req_o is sent)
   logic        p_elw_finish;            // Finish of p.elw load (when data_rvalid_i is received)
@@ -503,8 +504,8 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .jump_target_ex_i    ( jump_target_ex    ),
 
     // pipeline stalls
-    .halt_if_i           ( halt_if | apu_en_ex_o ),
-    .id_ready_i          ( id_ready          ),
+    .halt_if_i           ( halt_if ),
+    .id_ready_i          ( id_ready ),
 
     .if_busy_o           ( if_busy           ),
     .perf_imiss_o        ( perf_imiss        )
@@ -694,6 +695,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .data_ready_i                 ( data_rvalid_i ),
     .data_rdata_i                 ( lsu_rdata ),
     .data_load_o                  ( data_load ),
+    .data_load_vector_o           ( data_load_vector ),
 
     // Interrupt Signals
     .irq_i                        ( irq_i                ),
