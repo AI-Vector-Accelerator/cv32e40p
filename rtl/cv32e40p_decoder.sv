@@ -1901,6 +1901,29 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
             data_req       = 1'b0;
             data_we_o      = 1'b0;
           end
+        end else if (GDP_NVPE) begin
+          // NVPE connects to APU interface
+          apu_en              = 1'b1;
+          alu_en              = 1'b1;
+          apu_lat_o           = 2'h3;  // Number of cycles
+
+          apu_op_o[1:0]       = 2'b10; // STORE-FP
+          apu_op_o[2]         = instr_rdata_i[25];
+          apu_op_o[5:3]       = instr_rdata_i[14:12];
+
+          alu_op_a_mux_sel_o  = OP_A_REGA_OR_FWD;
+          rega_used_o         = 1'b1;  // Register A contains address
+          regfile_mem_we      = 1'b0;  // Not writing to register file
+          prepost_useincr_o   = 1'b0;  // Use operand a as address
+
+          regb_used_o         = 1'b1;  
+          alu_op_b_mux_sel_o  = OP_B_REGB_OR_FWD;
+          alu_op_c_mux_sel_o  = OP_C_INSTRUCTION;
+
+          data_load_vector    = 1'b1;
+
+          apu_regfile_wb_o    = 1'b0;
+        // FPU!=1
         end
         // FPU!=1
         else
