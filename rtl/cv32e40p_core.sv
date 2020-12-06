@@ -504,7 +504,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .jump_target_ex_i    ( jump_target_ex    ),
 
     // pipeline stalls
-    .halt_if_i           ( halt_if | apu_en_ex ),
+    .halt_if_i           ( halt_if ),
     .id_ready_i          ( id_ready ),
 
     .if_busy_o           ( if_busy           ),
