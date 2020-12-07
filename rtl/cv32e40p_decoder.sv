@@ -175,6 +175,9 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   logic       apu_en;
   logic       data_load_vector;
 
+  logic [5:0] funct6;
+  assign funct6 = instr_rdata_i[31:26];
+
   // this instruction needs floating-point rounding-mode verification
   logic check_fprm;
 
@@ -1766,6 +1769,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           reg_fp_d_o       = 1'b1;
           fp_rnd_mode_o    = instr_rdata_i[14:12];
 
+          
+
           // Decode Formats
           unique case (instr_rdata_i[26:25])
             // FP32
@@ -1979,6 +1984,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           alu_op_b_mux_sel_o  = OP_B_REGA_OR_FWD;
           alu_op_c_mux_sel_o  = OP_C_REGB_OR_FWD;
 
+          wfi_o = 1'b1;
           data_load_vector    = 1'b1;
         // FPU!=1
         end
@@ -2299,7 +2305,9 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           regfile_mem_we   = 1'b1;
           regfile_alu_we   = 1'b0;
 
-          data_load_vector = 1'b1;
+          if(funct6 != 6'b010000) data_load_vector = 1'b1;
+          
+          wfi_o = 1'b1;
 
         end else begin
           illegal_insn_o = 1'b1;

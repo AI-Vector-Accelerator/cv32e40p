@@ -418,7 +418,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .debug_p_elw_no_sleep_i     ( debug_p_elw_no_sleep ),
 
     // WFI wake
-    .wake_from_sleep_i          ( wake_from_sleep      )
+    .wake_from_sleep_i          ( wake_from_sleep )
   );
 
 
@@ -505,8 +505,8 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .jump_target_ex_i    ( jump_target_ex    ),
 
     // pipeline stalls
-    .halt_if_i           ( halt_if | apu_core_halt ),
-    .id_ready_i          ( id_ready ),
+    .halt_if_i           ( halt_if ),//| apu_core_halt ),
+    .id_ready_i          ( id_ready ),// & ~apu_core_halt ),
 
     .if_busy_o           ( if_busy           ),
     .perf_imiss_o        ( perf_imiss        )

@@ -84,6 +84,7 @@ module cv32e40p_register_file
   logic [NUM_TOT_WORDS-1:0]                 we_a_dec;
   logic [NUM_TOT_WORDS-1:0]                 we_b_dec;
 
+  logic [31:0] rf_view [31:0]; // Viewer
 
   //-----------------------------------------------------------------------------
   //-- READ : Read address decoder RAD
@@ -149,6 +150,8 @@ module cv32e40p_register_file
         end
       end
 
+      assign rf_view[i] = mem[i];
+
     end
 
     if (FPU == 1 && PULP_ZFINX == 0) begin : gen_mem_fp_write
@@ -169,5 +172,4 @@ module cv32e40p_register_file
     end
 
   endgenerate
-
 endmodule

@@ -194,7 +194,7 @@ module cv32e40p_apu_disp (
   // Stall signals
   //
   // Stall if we cannot store any more outstanding requests
-  assign stall_full      = valid_inflight;// & valid_waiting;
+  assign stall_full      = valid_inflight & valid_waiting;
   // Stall if there is a type conflict. if apu is active we can only issue requests with a larger or equal latency
   // than the latency of the inflight operation (apu_lat_i>=apu_lat). otherwise operations would overtake each other!
   // so we stall if: (apu_lat_i = 1 & apu_lat = 2/3) | (apu_lat_i = 2 & apu_lat = 3) | (apu_lat_i = 3 (multicycle))

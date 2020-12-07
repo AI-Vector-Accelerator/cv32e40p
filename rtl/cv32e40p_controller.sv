@@ -1330,12 +1330,12 @@ endgenerate
     begin
       deassert_we_o   = 1'b1;
       load_stall_o    = 1'b1;
-    end else if(data_load_vector_i) begin
-      deassert_we_o   = 1'b1;
-      halt_if_o = 1'b1;
+    end //else if(data_load_vector_i) begin
+      //deassert_we_o   = 1'b1;
+      //halt_if_o = 1'b1;
       //halt_id_o = 1'b1;
-      load_stall_o    = 1'b1;
-    end
+      //load_stall_o    = 1'b1;
+    //end
 
     // Stall because of jr path
     // - always stall if a result is to be forwarded to the PC
@@ -1436,7 +1436,7 @@ endgenerate
   end
 
   // wakeup from sleep conditions
-  assign wake_from_sleep_o = irq_wu_ctrl_i || debug_req_pending || debug_mode_q;
+  assign wake_from_sleep_o = irq_wu_ctrl_i || debug_req_pending || debug_mode_q || ~apu_stall_o;
 
   // debug mode
   assign debug_mode_o = debug_mode_q;

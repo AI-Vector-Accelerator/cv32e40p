@@ -188,11 +188,10 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     regfile_alu_we_fw_o    = '0;
     wb_contention          = 1'b0;
 
-    if (apu_op_o[1:0] == 2'b01 & (apu_valid | apu_stall)) begin // Prevent writeback for LOAD-FP
+    if ((apu_op_o[1:0] == 2'b01 | apu_operands_o[0][31:26] == 6'b010111) & (apu_valid | apu_stall)) begin // Prevent writeback for LOAD-FP
       regfile_alu_we_fw_o    = 1'b0;
       regfile_alu_waddr_fw_o = 5'd0;
       regfile_alu_wdata_fw_o = 32'd0;
-      wb_contention          = 1'b1;
     end
     // APU single cycle operations, and multicycle operations (>2cycles) are written back on ALU port
     else if (apu_valid & (apu_singlecycle | apu_multicycle)) begin
