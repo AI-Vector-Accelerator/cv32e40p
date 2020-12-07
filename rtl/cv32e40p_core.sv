@@ -95,7 +95,8 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
 
   // CPU Control Signals
   input  logic        fetch_enable_i,
-  output logic        core_sleep_o
+  output logic        core_sleep_o,
+  input  logic        apu_core_halt
 );
 
   import cv32e40p_pkg::*;
@@ -504,7 +505,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .jump_target_ex_i    ( jump_target_ex    ),
 
     // pipeline stalls
-    .halt_if_i           ( halt_if ),
+    .halt_if_i           ( halt_if | apu_core_halt ),
     .id_ready_i          ( id_ready ),
 
     .if_busy_o           ( if_busy           ),
