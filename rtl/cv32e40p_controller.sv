@@ -1326,9 +1326,14 @@ endgenerate
            (wb_ready_i == 1'b0) && (regfile_we_wb_i == 1'b1)
           ) &&
           ( (reg_d_ex_is_reg_a_i == 1'b1) || (reg_d_ex_is_reg_b_i == 1'b1) || (reg_d_ex_is_reg_c_i == 1'b1) ||
-            (is_decoding_o && (regfile_we_id_i && !data_misaligned_i) && (regfile_waddr_ex_i == regfile_alu_waddr_id_i)))) | (data_load_vector_i == 1'b1) )
+            (is_decoding_o && (regfile_we_id_i && !data_misaligned_i) && (regfile_waddr_ex_i == regfile_alu_waddr_id_i)))) )
     begin
       deassert_we_o   = 1'b1;
+      load_stall_o    = 1'b1;
+    end else if(data_load_vector_i) begin
+      deassert_we_o   = 1'b1;
+      halt_if_o = 1'b1;
+      //halt_id_o = 1'b1;
       load_stall_o    = 1'b1;
     end
 

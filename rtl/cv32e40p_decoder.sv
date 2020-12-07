@@ -1904,25 +1904,25 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
         end else if (GDP_NVPE) begin
           // NVPE connects to APU interface
           apu_en              = 1'b1;
-          alu_en              = 1'b1;
+          alu_en              = 1'b0;
           apu_lat_o           = 2'h3;  // Number of cycles
 
           apu_op_o[1:0]       = 2'b10; // STORE-FP
           apu_op_o[2]         = instr_rdata_i[25];
           apu_op_o[5:3]       = instr_rdata_i[14:12];
 
-          alu_op_a_mux_sel_o  = OP_A_REGA_OR_FWD;
-          rega_used_o         = 1'b1;  // Register A contains address
-          regfile_mem_we      = 1'b0;  // Not writing to register file
-          prepost_useincr_o   = 1'b0;  // Use operand a as address
+          apu_regfile_wb_o    = 1'b0;
 
+          rega_used_o         = 1'b1;  // Register A contains address
           regb_used_o         = 1'b1;  
-          alu_op_b_mux_sel_o  = OP_B_REGB_OR_FWD;
-          alu_op_c_mux_sel_o  = OP_C_INSTRUCTION;
+          regc_used_o         = 1'b0;
+          regfile_mem_we      = 1'b0;  // Not writing to register file
+
+          alu_op_a_mux_sel_o  = OP_A_INSTRUCTION;
+          alu_op_b_mux_sel_o  = OP_B_REGA_OR_FWD;
+          alu_op_c_mux_sel_o  = OP_C_REGB_OR_FWD;
 
           data_load_vector    = 1'b1;
-
-          apu_regfile_wb_o    = 1'b0;
         // FPU!=1
         end
         // FPU!=1
@@ -1961,26 +1961,25 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
         end else if (GDP_NVPE) begin
           // NVPE connects to APU interface
           apu_en              = 1'b1;
-          alu_en              = 1'b1;
+          alu_en              = 1'b0;
           apu_lat_o           = 2'h3;  // Number of cycles
 
           apu_op_o[1:0]       = 2'b01; // LOAD-FP
           apu_op_o[2]         = instr_rdata_i[25];
           apu_op_o[5:3]       = instr_rdata_i[14:12];
 
-          alu_op_a_mux_sel_o  = OP_A_REGA_OR_FWD;
-          rega_used_o         = 1'b1;  // Register A contains address
-          regfile_mem_we      = 1'b0;  // Not writing to register file
-          prepost_useincr_o   = 1'b0;  // Use operand a as address
-          //data_req            = 1'b1;  // Request Data Access
+          apu_regfile_wb_o    = 1'b0;
 
+          rega_used_o         = 1'b1;  // Register A contains address
           regb_used_o         = 1'b1;  
-          alu_op_b_mux_sel_o  = OP_B_REGB_OR_FWD;
-          alu_op_c_mux_sel_o  = OP_C_INSTRUCTION;
+          regc_used_o         = 1'b0;
+          regfile_mem_we      = 1'b0;  // Not writing to register file        
+
+          alu_op_a_mux_sel_o  = OP_A_INSTRUCTION;
+          alu_op_b_mux_sel_o  = OP_B_REGA_OR_FWD;
+          alu_op_c_mux_sel_o  = OP_C_REGB_OR_FWD;
 
           data_load_vector    = 1'b1;
-
-          apu_regfile_wb_o    = 1'b0;
         // FPU!=1
         end
         else
@@ -2293,14 +2292,14 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           regc_used_o      = 1'b1;
           regc_mux_o       = REGC_RD;
 
-          alu_op_a_mux_sel_o = OP_A_REGA_OR_FWD;
-          alu_op_b_mux_sel_o = OP_B_REGB_OR_FWD;
-          alu_op_c_mux_sel_o = OP_C_INSTRUCTION;
+          alu_op_a_mux_sel_o = OP_A_INSTRUCTION;
+          alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
+          alu_op_c_mux_sel_o = OP_C_REGB_OR_FWD;
 
-          regfile_mem_we = 1'b1;
-          regfile_alu_we = 1'b1;
+          regfile_mem_we   = 1'b1;
+          regfile_alu_we   = 1'b0;
 
-          data_load_vector    = 1'b1;
+          data_load_vector = 1'b1;
 
         end else begin
           illegal_insn_o = 1'b1;
