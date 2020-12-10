@@ -2302,7 +2302,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
           alu_op_c_mux_sel_o = OP_C_REGB_OR_FWD;
 
-          regfile_mem_we   = 1'b1;
+          regfile_mem_we   = 1'b0;
           regfile_alu_we   = 1'b0;
 
           if(funct6 != 6'b010000) data_load_vector = 1'b1;
