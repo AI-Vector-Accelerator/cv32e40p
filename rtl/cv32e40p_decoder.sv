@@ -153,7 +153,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   output logic [1:0]  ctrl_transfer_insn_in_id_o,   // control transfer instructio is decoded
   output logic [1:0]  ctrl_transfer_target_mux_sel_o,        // jump target selection
 
-  output logic data_load_vector_o,
+  output logic apu_regfile_wb_disable_o,
 
   // HPM related control signals
   input  logic [31:0] mcounteren_i
@@ -173,9 +173,11 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   logic       mult_int_en;
   logic       mult_dot_en;
   logic       apu_en;
-  logic       data_load_vector;
+  logic       apu_regfile_wb_disable;
 
+  logic [2:0] funct3;
   logic [5:0] funct6;
+  assign funct3 = instr_rdata_i[14:12];
   assign funct6 = instr_rdata_i[31:26];
 
   // this instruction needs floating-point rounding-mode verification
@@ -292,7 +294,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
     uret_dec_o                  = 1'b0;
     dret_dec_o                  = 1'b0;
 
-    data_load_vector            = 1'b0;
+    apu_regfile_wb_disable            = 1'b0;
 
     unique case (instr_rdata_i[6:0])
 
@@ -1927,7 +1929,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           alu_op_b_mux_sel_o  = OP_B_REGA_OR_FWD;
           alu_op_c_mux_sel_o  = OP_C_REGB_OR_FWD;
 
-          data_load_vector    = 1'b1;
+          wfi_o = 1'b1;
+          apu_regfile_wb_disable = 1'b1;
         // FPU!=1
         end
         // FPU!=1
@@ -1985,7 +1988,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           alu_op_c_mux_sel_o  = OP_C_REGB_OR_FWD;
 
           wfi_o = 1'b1;
-          data_load_vector    = 1'b1;
+          apu_regfile_wb_disable = 1'b1;
         // FPU!=1
         end
         else
@@ -2302,12 +2305,30 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           alu_op_b_mux_sel_o = OP_B_REGA_OR_FWD;
           alu_op_c_mux_sel_o = OP_C_REGB_OR_FWD;
 
-          regfile_mem_we   = 1'b0;
           regfile_alu_we   = 1'b0;
-
-          if(funct6 != 6'b010000) data_load_vector = 1'b1;
+          apu_regfile_wb_disable = 1'b1;
           
-          wfi_o = 1'b1;
+          wfi_o = 1'b1; // Pipeline flush on every instruction
+
+          // Do any other instructions need to write to regfile?
+          // Specific instruction breakdown
+          if (funct3 == V_OPCFG) begin
+            apu_regfile_wb_disable = 1'b0;    
+            regfile_mem_we = 1'b1;
+          end else begin
+            // Look for all other OP-V instructions
+            case (funct6)
+              6'b010000: begin // VWXUNARY0 (vmv.x.s) 
+                apu_regfile_wb_disable = 1'b0;    
+                regfile_mem_we = 1'b1;
+              end
+          
+              default: begin
+                apu_regfile_wb_disable = 1'b1;    
+                regfile_mem_we = 1'b0;
+              end
+            endcase
+          end
 
         end else begin
           illegal_insn_o = 1'b1;
@@ -2708,7 +2729,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   assign hwlp_we_o                   = (deassert_we_i) ? 3'b0          : hwlp_we;
   assign csr_op_o                    = (deassert_we_i) ? CSR_OP_READ   : csr_op;
   assign ctrl_transfer_insn_in_id_o  = (deassert_we_i) ? BRANCH_NONE   : ctrl_transfer_insn;
-  assign data_load_vector_o          = (deassert_we_i) ? 1'b0          : data_load_vector;
+  assign apu_regfile_wb_disable_o          = (deassert_we_i) ? 1'b0          : apu_regfile_wb_disable;
 
   assign ctrl_transfer_insn_in_dec_o  = ctrl_transfer_insn;
   assign regfile_alu_we_dec_o         = regfile_alu_we;

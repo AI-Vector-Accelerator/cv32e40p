@@ -260,7 +260,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
   logic        data_req_ex;
   logic        data_load_event_ex;
   logic        data_misaligned_ex;
-  logic        data_load_vector;
+  logic        apu_regfile_wb_disable_ex;
 
   logic        p_elw_start;             // Start of p.elw load (when data_req_o is sent)
   logic        p_elw_finish;            // Finish of p.elw load (when data_rvalid_i is received)
@@ -696,7 +696,7 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .data_ready_i                 ( data_rvalid_i ),
     .data_rdata_i                 ( lsu_rdata ),
     .data_load_o                  ( data_load ),
-    .data_load_vector_o           ( data_load_vector ),
+    .apu_regfile_wb_disable_o     ( apu_regfile_wb_disable_ex ),
 
     // Interrupt Signals
     .irq_i                        ( irq_i                ),
@@ -886,7 +886,8 @@ module cv32e40p_core import cv32e40p_apu_core_pkg::*;
     .wb_ready_i                 ( lsu_ready_wb                 ),
 
     .apu_stall_o                ( apu_stall ),
-    .apu_regfile_wb_i           ( apu_regfile_wb_ex )
+    .apu_regfile_wb_i           ( apu_regfile_wb_ex ),
+    .apu_regfile_wb_disable_i   ( apu_regfile_wb_disable_ex )
   );
 
 

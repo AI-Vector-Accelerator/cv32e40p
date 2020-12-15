@@ -153,7 +153,8 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
   output logic        ex_valid_o, // EX stage gets new data
   input  logic        wb_ready_i,  // WB stage ready for new data
 
-  output logic        apu_stall_o // Feed apu stall to decode
+  output logic        apu_stall_o, // Feed apu stall to decode
+  input  logic        apu_regfile_wb_disable_i // 
 );
 
   logic [31:0]    alu_result;
@@ -162,6 +163,7 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
 
   logic           regfile_we_lsu;
   logic [5:0]     regfile_waddr_lsu;
+  logic           apu_regfile_wb_disable_reg;
 
   logic           wb_contention;
   logic           wb_contention_lsu;
@@ -188,7 +190,7 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     regfile_alu_we_fw_o    = '0;
     wb_contention          = 1'b0;
 
-    if ((apu_op_o[1:0] == 2'b01 | apu_operands_o[0][31:26] == 6'b000000 | apu_operands_o[0][31:26] == 6'b010111) & (apu_valid | apu_stall)) begin // Prevent writeback for LOAD-FP
+    if (apu_regfile_wb_disable_reg & apu_valid) begin // Prevent writeback for LOAD-FP
       regfile_alu_we_fw_o    = 1'b0;
       regfile_alu_waddr_fw_o = 5'd0;
       regfile_alu_wdata_fw_o = 32'd0;
@@ -393,6 +395,7 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     begin
       regfile_waddr_lsu   <= '0;
       regfile_we_lsu      <= 1'b0;
+      apu_regfile_wb_disable_reg <= 1'b0;
     end
     else
     begin
@@ -406,7 +409,9 @@ module cv32e40p_ex_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
         // we are ready for a new instruction, but there is none available,
         // so we just flush the current one out of the pipe
         regfile_we_lsu    <= 1'b0;
-      end
+      end if(apu_req) begin // Register regfile writeback disable for apu transaction
+          apu_regfile_wb_disable_reg <= apu_regfile_wb_disable_i;
+        end
     end
   end
 

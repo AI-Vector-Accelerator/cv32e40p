@@ -201,7 +201,7 @@ module cv32e40p_controller import cv32e40p_pkg::*;
   // Performance Counters
   output logic        perf_pipeline_stall_o,       // stall due to elw extra cycles
 
-  input logic data_load_vector_i
+  input logic apu_regfile_wb_disable_i
 );
 
   // FSM state encoding
@@ -1330,7 +1330,7 @@ endgenerate
     begin
       deassert_we_o   = 1'b1;
       load_stall_o    = 1'b1;
-    end //else if(data_load_vector_i) begin
+    end //else if(apu_regfile_wb_disable_i) begin
       //deassert_we_o   = 1'b1;
       //halt_if_o = 1'b1;
       //halt_id_o = 1'b1;

@@ -187,7 +187,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     input  logic        data_ready_i,
     input  logic [31:0] data_rdata_i,
     output  logic        data_load_o,
-    output logic        data_load_vector_o,
+    output logic        apu_regfile_wb_disable_o,
 
     output logic        data_misaligned_ex_o,
 
@@ -407,7 +407,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
   logic [1:0]  data_reg_offset_id;
   logic        data_req_id;
   logic        data_load_event_id;
-  logic        data_load_vector_id;
+  logic        apu_regfile_wb_disable_id;
 
   // Atomic memory instruction
   logic [5:0]  atop_id;
@@ -1089,7 +1089,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     .data_sign_extension_o           ( data_sign_ext_id          ),
     .data_reg_offset_o               ( data_reg_offset_id        ),
     .data_load_event_o               ( data_load_event_id        ),
-    .data_load_vector_o              ( data_load_vector_id       ),
+    .apu_regfile_wb_disable_o              ( apu_regfile_wb_disable_id       ),
 
     .data_ready_i                    ( data_ready_i ),
     .data_load_o                     ( data_load_o  ),
@@ -1297,7 +1297,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
     // Performance Counters
     .perf_pipeline_stall_o          ( perf_pipeline_stall    ),
 
-    .data_load_vector_i             (data_load_vector_o)
+    .apu_regfile_wb_disable_i       ( apu_regfile_wb_disable_o )
   );
 
 
@@ -1522,7 +1522,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
       pc_ex_o                     <= '0;
 
       branch_in_ex_o              <= 1'b0;
-      data_load_vector_o          <= 1'b0;
+      apu_regfile_wb_disable_o          <= 1'b0;
     end
     else if (data_misaligned_i) begin
       // misaligned data access case
@@ -1596,7 +1596,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
           apu_flags_ex_o            <= apu_flags;
           apu_waddr_ex_o            <= apu_waddr;
           apu_regfile_wb_ex_o       <= apu_regfile_wb;
-          data_load_vector_o        <= data_load_vector_id;
+          apu_regfile_wb_disable_o        <= apu_regfile_wb_disable_id;
         end
 
         regfile_we_ex_o             <= regfile_we_id;
@@ -1639,7 +1639,7 @@ module cv32e40p_id_stage import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*
         // EX stage is ready but we don't have a new instruction for it,
         // so we set all write enables to 0, but unstall the pipe
 
-        data_load_vector_o          <= 1'b0;
+        apu_regfile_wb_disable_o          <= 1'b0;
 
         regfile_we_ex_o             <= 1'b0;
 
