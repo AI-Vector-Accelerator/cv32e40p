@@ -25,7 +25,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*; import cv32e40p_fpu_pkg::*;
+module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*; import cv32e40p_fpu_pkg::*; import accelerator_pkg::*;
 #(
   parameter PULP_XPULP        = 0,              // PULP ISA Extension (including PULP specific CSRs and hardware loop, excluding p.elw)
   parameter PULP_CLUSTER      = 0,
